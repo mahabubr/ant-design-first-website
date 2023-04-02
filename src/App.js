@@ -3,6 +3,7 @@ import './App.css';
 import Admin from './components/Admin';
 import Dashboard from './components/Dashboard';
 import FormField from './components/FormField';
+import SendEmail from './components/SendEmail';
 import SignUp from './components/SignUp';
 
 function App() {
@@ -23,6 +24,10 @@ function App() {
     {
       path: '/admin',
       element: <Admin />
+    },
+    {
+      path: '/send-email',
+      element: <SendEmail />
     },
   ])
 
