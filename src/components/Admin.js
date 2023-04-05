@@ -1,68 +1,64 @@
 import { Button, Form, Input, message, Modal, Popconfirm, Table } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import usePost from '../hooks/usePost';
+import useInsert from '../hooks/useInsert';
+import useUpdate from '../hooks/useUpdate';
+import useDelete from '../hooks/useDelete';
 
 const Admin = () => {
+
     const [key, setKey] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [insetData, setInsertData] = useState({})
+    const [updatedData, setUpdatedData] = useState({})
+    const [deletedKey, setDeletedKey] = useState('')
+
+    const [info] = usePost()
+    const [inset] = useInsert(insetData)
+    const [updateData] = useUpdate(updatedData, key)
+    const [deletedItem] = useDelete(deletedKey)
+
+    if (inset.id) {
+        message.open({
+            type: 'success',
+            content: 'User Added',
+        });
+    }
+    if (updateData.affected) {
+        message.open({
+            type: 'success',
+            content: 'User Update',
+        });
+    }
+    if (deletedItem.affected) {
+        message.open({
+            type: 'success',
+            content: 'Delete Successful',
+        });
+    }
+
     const showModal = (key) => {
         setKey(key);
         setIsModalOpen(true);
     };
     const handleOk = () => {
-
         setIsModalOpen(false);
     };
     const handleCancel = () => {
         setIsModalOpen(false);
     };
 
-    const [info, setInfo] = useState([])
-    useEffect(() => {
-        fetch('http://localhost:3000/reg/index')
-            .then(res => res.json())
-            .then(data => setInfo(data))
-    }, [])
-
     const onFinish = (values) => {
-        fetch('http://localhost:3000/reg/insertadmin', {
-            method: "POST",
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(values)
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.id) {
-                    message.open({
-                        type: 'success',
-                        content: 'User Added',
-                    });
-
-                }
-            })
-            .catch(e => console.log(e.message))
+        setInsertData(values)
     };
 
     const handleUpdateForm = (values) => {
-        fetch(`http://localhost:3000/reg/updateadmin/${key.id}`, {
-            method: "PUT",
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify(values)
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.affected) {
-                    message.open({
-                        type: 'success',
-                        content: 'Update Admin Info',
-                    });
+        setUpdatedData(values)
+    }
 
-                }
-            })
-            .catch(e => console.log(e.message))
+    const handleDelete = (key) => {
+        setDeletedKey(key)
     }
 
     const onFinishFailed = (errorInfo) => {
@@ -75,8 +71,8 @@ const Admin = () => {
 
     const columns = [
         {
-            title: 'Name',
-            dataIndex: 'name',
+            title: 'title',
+            dataIndex: 'title',
         },
         {
             title: 'Email',
@@ -92,7 +88,7 @@ const Admin = () => {
             key: 'x',
             render: (_, record) => info.length >= 1 ? (
                 <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.id)}>
-                    <a>Delete</a>
+                    <a href='/' >Delete</a>
                 </Popconfirm>
             ) : null,
         },
@@ -107,24 +103,6 @@ const Admin = () => {
             ) : null,
         },
     ];
-
-    const handleDelete = (key) => {
-        fetch(`http://localhost:3000/reg/deleteadmin/${key}`, {
-            method: "DELETE",
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.affected) {
-                    message.open({
-                        type: 'success',
-                        content: 'Admin Deleted Successful',
-                    });
-                    const newData = info.filter((item) => item.id !== key);
-                    setInfo(newData);
-                }
-            })
-            .catch(e => console.log(e.message))
-    }
 
     return (
         <div>
